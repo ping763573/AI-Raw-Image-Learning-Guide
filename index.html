@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 生圖學習指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --button-height: 5.5rem;
+            --button-font-size: 2rem;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .section-header {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #a78bfa, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 3rem;
+            text-align: center;
+            text-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+            position: relative;
+            padding-bottom: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+        
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 8px;
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6, #10b981);
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
+        }
+        
+        /* 3D導航按鈕容器 */
+        .nav-container {
+            position: relative;
+            margin: 0 auto 4rem;
+            max-width: 1300px;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 25px;
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.4),
+                inset 0 0 20px rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            z-index: 10;
+        }
+        
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        /* 3D立體按鈕設計 */
+        .nav-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: var(--button-height);
+            font-size: var(--button-font-size);
+            font-weight: 800;
+            border-radius: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 15px 0 rgba(0, 0, 0, 0.4),
+                0 25px 40px rgba(0, 0, 0, 0.3);
+            border: none;
+            outline: none;
+            cursor: pointer;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            letter-spacing: 0.5px;
+            overflow: hidden;
+            z-index: 1;
+            transform: translateY(0);
+            padding: 0 1.5rem;
+            text-align: center;
+            line-height: 1.3;
+        }
+        
+        /* 按钮顶部高光效果 */
+        .nav-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
+            border-radius: 18px 18px 0 0;
+            z-index: 2;
+        }
+        
+        /* 按钮悬停效果 */
+        .nav-button:hover {
+            transform: translateY(-8px);
+            box-shadow: 
+                0 22px 0 rgba(0, 0, 0, 0.35),
+                0 35px 50px rgba(0, 0, 0, 0.4);
+        }
+        
+        .nav-button:active, .nav-button.active {
+            transform: translateY(12px);
+            box-shadow: 
+                0 3px 0 rgba(0, 0, 0, 0.4),
+                0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* 按钮激活效果 */
+        .nav-button.active {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 12px 0 rgba(0,0,0,0.4), 0 25px 40px rgba(0,0,0,0.3), 0 0 30px rgba(255, 255, 255, 0.6); }
+            50% { box-shadow: 0 12px 0 rgba(0,0,0,0.4), 0 25px 40px rgba(0,0,0,0.3), 0 0 50px rgba(255, 255, 255, 0.9); }
+            100% { box-shadow: 0 12px 0 rgba(0,0,0,0.4), 0 25px 40px rgba(0,0,0,0.3), 0 0 30px rgba(255, 255, 255, 0.6); }
+        }
+        
+        /* 按钮渐变背景 */
+        .bg-gradient-green { background: linear-gradient(to bottom, #22c55e, #15803d); }
+        .bg-gradient-purple { background: linear-gradient(to bottom, #a78bfa, #7c3aed); }
+        .bg-gradient-red { background: linear-gradient(to bottom, #f87171, #dc2626); }
+        .bg-gradient-orange { background: linear-gradient(to bottom, #fb923c, #ea580c); }
+        .bg-gradient-teal { background: linear-gradient(to bottom, #2dd4bf, #0d9488); }
+        .bg-gradient-pink { background: linear-gradient(to bottom, #f9a8d4, #ec4899); }
+        .bg-gradient-indigo { background: linear-gradient(to bottom, #818cf8, #4f46e5); }
+        
+        /* 内容区域 */
+        .content-section {
+            display: none;
+            padding: 3.5rem;
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            margin-top: 3rem;
+            transition: all 0.6s ease-in-out;
+            transform: translateY(25px);
+            opacity: 0;
+            background: rgba(15, 23, 42, 0.8);
+            border-top: 10px solid;
+            backdrop-filter: blur(10px);
+        }
+        
+        .content-section.active {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+            animation: fadeIn 0.7s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 内容区域边框颜色 */
+        #principles.content-section { border-color: #22c55e; }
+        #comparison.content-section { border-color: #a78bfa; }
+        #installation.content-section { border-color: #f87171; }
+        #steps.content-section { border-color: #fb923c; }
+        #prompts.content-section { border-color: #2dd4bf; }
+        #examples.content-section { border-color: #f9a8d4; }
+        #videos.content-section { border-color: #818cf8; }
+        
+        /* 内容样式 */
+        h2 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #e2e8f0;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid;
+            display: inline-block;
+        }
+        
+        #principles h2 { border-color: #22c55e; }
+        #comparison h2 { border-color: #a78bfa; }
+        #installation h2 { border-color: #f87171; }
+        #steps h2 { border-color: #fb923c; }
+        #prompts h2 { border-color: #2dd4bf; }
+        #examples h2 { border-color: #f9a8d4; }
+        #videos h2 { border-color: #818cf8; }
+        
+        h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            margin: 3rem 0 1.8rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        
+        h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 85%;
+            background: currentColor;
+            border-radius: 4px;
+        }
+        
+        p {
+            font-size: 1.3rem;
+            color: #cbd5e1;
+            line-height: 1.8;
+            margin-bottom: 1.8rem;
+        }
+        
+        ul, ol {
+            padding-left: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        li {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #60a5fa;
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2.5rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        th, td {
+            padding: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+        
+        th {
+            background: #4f46e5;
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 1.2rem;
+        }
+        
+        tr:nth-child(even) {
+            background: rgba(30, 41, 59, 0.6);
+        }
+        
+        tr:hover {
+            background: rgba(51, 65, 85, 0.5);
+        }
+        
+        /* 響應式調整 */
+        @media (max-width: 1280px) {
+            .nav-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+            
+            .nav-button {
+                font-size: 1.8rem;
+                height: 5rem;
+            }
+            
+            .section-header {
+                font-size: 3.5rem;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .section-header {
+                font-size: 3rem;
+            }
+            
+            .content-section {
+                padding: 2.5rem;
+            }
+            
+            h2 {
+                font-size: 2.5rem;
+            }
+            
+            h3 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-header {
+                font-size: 2.5rem;
+            }
+            
+            .nav-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+            
+            .nav-button {
+                font-size: 1.6rem;
+                height: 4.5rem;
+            }
+            
+            .content-section {
+                padding: 2rem;
+            }
+            
+            h2 {
+                font-size: 2.2rem;
+            }
+            
+            h3 {
+                font-size: 1.6rem;
+            }
+            
+            p, li {
+                font-size: 1.15rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .section-header {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .nav-container {
+                padding: 1.5rem;
+            }
+            
+            .nav-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-button {
+                font-size: 1.8rem;
+                height: 5rem;
+            }
+            
+            .content-section {
+                padding: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.9rem;
+            }
+            
+            h3 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* 背景裝飾元素 */
+        .decoration {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .decoration-1 {
+            top: 10%;
+            left: 5%;
+            font-size: 25rem;
+            color: #818cf8;
+        }
+        
+        .decoration-2 {
+            bottom: 15%;
+            right: 5%;
+            font-size: 20rem;
+            color: #2dd4bf;
+            transform: rotate(25deg);
+        }
+        
+        .decoration-3 {
+            top: 40%;
+            right: 15%;
+            font-size: 15rem;
+            color: #f9a8d4;
+            transform: rotate(-15deg);
+        }
+        
+        /* 頁腳樣式 */
+        footer {
+            margin-top: 5rem;
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            border-top: 1px solid #334155;
+        }
+        
+        /* 卡片樣式 */
+        .feature-card {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+        }
+        
+        #principles .feature-card { border-left-color: #22c55e; }
+        #comparison .feature-card { border-left-color: #a78bfa; }
+        #installation .feature-card { border-left-color: #f87171; }
+        #steps .feature-card { border-left-color: #fb923c; }
+        #prompts .feature-card { border-left-color: #2dd4bf; }
+        #examples .feature-card { border-left-color: #f9a8d4; }
+        #videos .feature-card { border-left-color: #818cf8; }
+        
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .platform-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .platform-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border-top: 4px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+        
+        .platform-card.gemini { border-top-color: #4285f4; }
+        .platform-card.bing { border-top-color: #0078d7; }
+        .platform-card.doubao { border-top-color: #ff0000; }
+        .platform-card.dreamina { border-top-color: #00c4cc; }
+        .platform-card.chatgpt { border-top-color: #10a37f; }
+        .platform-card.grok { border-top-color: #1da1f2; }
+        
+        /* 實際範例樣式 */
+        .example-item {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-left: 5px solid #f9a8d4;
+            transition: all 0.3s ease;
+        }
+        
+        .example-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        
+        .example-item h3 {
+            font-size: 1.8rem;
+            color: #f9a8d4;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-left: 0;
+        }
+        
+        .example-item h3::before {
+            display: none;
+        }
+        
+        .example-item p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .example-item img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .example-item img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+        
+        .example-item strong {
+            color: #f9a8d4;
+        }
+
+        .video-disclaimer {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        /* New style for video thumbnail images */
+        .video-thumbnail {
+            width: 100%;
+            height: 12rem; /* Fixed height for consistency */
+            object-fit: cover; /* Ensures the image covers the area without distortion */
+            border-radius: 0.75rem; /* rounded-xl equivalent */
+            margin-top: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .video-thumbnail:hover {
+            transform: scale(1.03); /* Slight zoom on hover */
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景裝飾 -->
+    <div class="decoration decoration-1">
+        <i class="fas fa-robot"></i>
+    </div>
+    <div class="decoration decoration-2">
+        <i class="fas fa-paint-brush"></i>
+    </div>
+    <div class="decoration decoration-3">
+        <i class="fas fa-brain"></i>
+    </div>
+    
+    <div class="container py-8">
+        <h1 class="section-header">AI 生圖學習指南</h1>
+
+        <!-- 3D導航按鈕容器 -->
+        <div class="nav-container">
+            <div class="nav-buttons">
+                <button class="nav-button bg-gradient-green" onclick="showSection('principles', event)">
+                    <i class="fas fa-atom mr-3"></i>生圖原理
+                </button>
+                <button class="nav-button bg-gradient-purple" onclick="showSection('comparison', event)">
+                    <i class="fas fa-balance-scale mr-3"></i>功能比較
+                </button>
+                <button class="nav-button bg-gradient-red" onclick="showSection('installation', event)">
+                    <i class="fas fa-download mr-3"></i>安裝指南
+                </button>
+                <button class="nav-button bg-gradient-orange" onclick="showSection('steps', event)">
+                    <i class="fas fa-footsteps mr-3"></i>生圖步驟
+                </button>
+                <button class="nav-button bg-gradient-teal" onclick="showSection('prompts', event)">
+                    <i class="fas fa-keyboard mr-3"></i>提示詞寫法
+                </button>
+                <button class="nav-button bg-gradient-pink" onclick="showSection('examples', event)">
+                    <i class="fas fa-images mr-3"></i>實際範例
+                </button>
+                <button class="nav-button bg-gradient-indigo" onclick="showSection('videos', event)">
+                    <i class="fas fa-video mr-3"></i>教學影片
+                </button>
+            </div>
+        </div>
+
+        <!-- 內容區域 -->
+        <div id="principles" class="content-section">
+            <h2><i class="fas fa-atom mr-3"></i>AI 生圖原理</h2>
+            <p>AI 圖像生成技術的核心通常基於「生成對抗網路 (GAN)」或更常見的「擴散模型 (Diffusion Models)」。這些模型學會如何從隨機雜訊中逐步「去噪」，最終生成與訓練數據相似的圖像。</p>
+            
+            <div class="feature-card">
+                <h3>擴散模型 (Diffusion Models)</h3>
+                <p>擴散模型是目前最主流的圖像生成技術。其基本原理是：</p>
+                <ol>
+                    <li><strong>正向過程 (Forward Process / 加噪過程):</strong> 模型會學習如何逐步向圖像中添加高斯雜訊，直到圖像完全變成隨機雜訊。</li>
+                    <li><strong>反向過程 (Reverse Process / 去噪過程):</strong> 模型會學習如何從雜訊中逐步移除雜訊，並在每一步都預測出雜訊的殘差，從而將雜訊還原成清晰的圖像。這個去噪過程是生成圖像的關鍵。</li>
+                </ol>
+            </div>
+            
+            <div class="feature-card">
+                <h3>核心組件</h3>
+                <ul>
+                    <li><strong>U-Net:</strong> 一種卷積神經網路，負責在去噪過程中預測雜訊。</li>
+                    <li><strong>變分自編碼器 (VAE):</strong> 將圖像壓縮到一個低維度的潛在空間，並將其解碼回圖像。這有助於模型在高效率下處理高解析度圖像。</li>
+                    <li><strong>文本編碼器 (Text Encoder):</strong> 將文字提示轉換為模型可以理解的數值表示（向量），引導圖像生成過程朝著提示的方向發展。</li>
+                </ul>
+                <p>透過訓練大量的圖像-文本對數據，這些模型學會了理解提示詞的含義，並能生成符合描述的視覺內容。</p>
+            </div>
+        </div>
+
+        <div id="comparison" class="content-section">
+            <h2><i class="fas fa-balance-scale mr-3"></i>生圖AI平台功能比較</h2>
+            <p>以下是針對 2025 年主流 AI 平台的圖像生成功能、特色與限制比較說明：</p>
+            
+            <div class="overflow-x-auto rounded-xl shadow-2xl mt-8">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>平台</th>
+                            <th>圖像生成功能</th>
+                            <th>特色功能</th>
+                            <th>輸出品質</th>
+                            <th>中文支援</th>
+                            <th>適合族群</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Gemini 2.0</strong><br>(Google)</td>
+                            <td>✅ 內建圖像生成<br>✅ 指令式生圖</td>
+                            <td>閃光燈即時資料生成<br>高寫實風格圖</td>
+                            <td>非常高<br>(寫實度極高)</td>
+                            <td>部分支援</td>
+                            <td>技術開發者<br>圖文整合創作者</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bing Image Creator</strong><br>(Microsoft)</td>
+                            <td>✅ 文字轉圖像<br>✅ 風格轉換</td>
+                            <td>免費使用<br>繁體中文支援</td>
+                            <td>高<br>(細節光影自然)</td>
+                            <td>完整支援</td>
+                            <td>一般使用者<br>教育用途</td>
+                        </tr>
+                        <tr>
+                            <td><strong>豆包AI</strong><br>(抖音旗下)</td>
+                            <td>✅ 風格圖像生成<br>✅ 動漫/寫實</td>
+                            <td>多語支持<br>快速導入影片平台</td>
+                            <td>中等偏高<br>(風格強烈)</td>
+                            <td>簡體中文</td>
+                            <td>抖音創作者<br>中文行銷</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dreamina</strong><br>(CapCut)</td>
+                            <td>✅ 圖像生成<br>✅ AI動畫生成</td>
+                            <td>快速轉為影片片段<br>風格模板微調</td>
+                            <td>中上<br>(視風格而異)</td>
+                            <td>簡體中文</td>
+                            <td>短影音創作人<br>社群經營者</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ChatGPT</strong><br>(OpenAI)</td>
+                            <td>✅ 文字生成圖像<br>✅ 圖像修改/續畫</td>
+                            <td>可點選修改細節<br>文字互動結合生成</td>
+                            <td>高<br>(畫風清晰)</td>
+                            <td>繁簡皆可</td>
+                            <td>跨語言創作<br>故事創作</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Grok-X</strong><br>(X.ai/Elon Musk)</td>
+                            <td>✅ 圖像理解<br>✅ 簡單生圖功能</td>
+                            <td>整合X平台(Twitter)<br>推文生成圖片</td>
+                            <td>中<br>(功能未成熟)</td>
+                            <td>不支援</td>
+                            <td>X平台用戶<br>科技愛好者</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="feature-card mt-8">
+                <h3>功能總結比較</h3>
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>功能項目</th>
+                                <th>Gemini</th>
+                                <th>Bing</th>
+                                <th>豆包</th>
+                                <th>Dreamina</th>
+                                <th>ChatGPT</th>
+                                <th>Grok-X</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>✅ 文字生成圖像</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                            <tr>
+                                <td>🖼️ 圖片修改/續畫</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                                <td>✔️</td>
+                                <td>❌</td>
+                            </tr>
+                            <tr>
+                                <td>🎥 影片生成功能</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                                <td>✔️</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                            </tr>
+                            <tr>
+                                <td>🌐 中文支援</td>
+                                <td>部分</td>
+                                <td>完整</td>
+                                <td>簡體</td>
+                                <td>簡體</td>
+                                <td>繁簡皆可</td>
+                                <td>不支援</td>
+                            </tr>
+                            <tr>
+                                <td>💸 免費方案</td>
+                                <td>❌</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="installation" class="content-section">
+            <h2><i class="fas fa-download mr-3"></i>各生圖AI安裝指南</h2>
+            <p>以下是一些主流AI生圖工具的簡易安裝與使用指南：</p>
+            
+            <div class="platform-grid">
+                <div class="platform-card gemini">
+                    <h3>Gemini 2.0（Google 雙子座）</h3>
+                    <p>Gemini 2.0 圖像生成功能目前正在逐步開放中，主要通過其聊天介面進行。</p>
+                    <ul>
+                        <li><strong>官方網站:</strong> <a href="https://gemini.google.com/" target="_blank" class="text-blue-400 hover:underline">gemini.google.com</a></li>
+                        <li><strong>安裝步驟:</strong>
+                            <ol>
+                                <li>登入您的 Google 帳戶</li>
+                                <li>前往 Gemini 網站</li>
+                                <li>在聊天介面輸入指令生成圖像</li>
+                                <li>注意：繁體中文區用戶可能仍需等待功能全面開放</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="platform-card bing">
+                    <h3>Bing Image Creator</h3>
+                    <p>由 Microsoft 提供，內建 DALL·E 3，提供免費且高品質的圖像生成。</p>
+                    <ul>
+                        <li><strong>官方網站:</strong> <a href="https://www.bing.com/images/create" target="_blank" class="text-blue-400 hover:underline">bing.com/images/create</a></li>
+                        <li><strong>安裝步驟:</strong>
+                            <ol>
+                                <li>登入 Microsoft 帳戶</li>
+                                <li>訪問 Bing Image Creator</li>
+                                <li>輸入提示詞生成圖像</li>
+                                <li>每日有免費生成次數</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="platform-card doubao">
+                    <h3>豆包AI（字節跳動/抖音）</h3>
+                    <p>字節跳動旗下AI產品，與抖音、剪映等生態整合。</p>
+                    <ul>
+                        <li><strong>官方網站:</strong> <a href="https://www.doubao.com/" target="_blank" class="text-blue-400 hover:underline">doubao.com</a></li>
+                        <li><strong>安裝步驟:</strong>
+                            <ol>
+                                <li>下載「豆包」App或使用網頁版</li>
+                                <li>使用抖音或手機號碼註冊</li>
+                                <li>進入圖像生成功能模組</li>
+                                <li>輸入提示詞生成圖片</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="platform-card dreamina">
+                    <h3>Dreamina by CapCut</h3>
+                    <p>由 CapCut (剪映國際版) 團隊開發的圖像和動畫生成工具。</p>
+                    <ul>
+                        <li><strong>官方網站:</strong> <a href="https://www.capcut.com/dreamina" target="_blank" class="text-blue-400 hover:underline">capcut.com/dreamina</a></li>
+                        <li><strong>安裝步驟:</strong>
+                            <ol>
+                                <li>註冊 CapCut 帳戶或使用現有帳戶登入</li>
+                                <li>訪問 Dreamina 網站</li>
+                                <li>選擇圖像生成或AI動畫功能</li>
+                                <li>輸入提示詞並調整參數</li>
+                                <li>免費方案可能帶有浮水印</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="platform-card chatgpt">
+                    <h3>ChatGPT（含DALL·E 3）</h3>
+                    <p>OpenAI 旗艦AI，DALL·E 3圖像生成功能整合於ChatGPT Plus訂閱中。</p>
+                    <ul>
+                        <li><strong>官方網站:</strong> <a href="https://chat.openai.com/" target="_blank" class="text-blue-400 hover:underline">chat.openai.com</a></li>
+                        <li><strong>安裝步驟:</strong>
+                            <ol>
+                                <li>訂閱 ChatGPT Plus</li>
+                                <li>登入 ChatGPT 帳戶</li>
+                                <li>選擇 GPT-4 模型</li>
+                                <li>輸入圖像描述生成圖片</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="platform-card grok">
+                    <h3>Grok-X（X.ai/Elon Musk）</h3>
+                    <p>Elon Musk 旗下 X.ai 開發的AI，圖像功能仍在發展中並與 X 平台整合。</p>
+                    <ul>
+                        <li><strong>官方網站:</strong> <a href="https://x.ai/" target="_blank" class="text-blue-400 hover:underline">x.ai</a></li>
+                        <li><strong>安裝步驟:</strong>
+                            <ol>
+                                <li>目前 Grok-X 圖像功能主要通過 X 平台整合</li>
+                                <li>訂閱 X Premium 服務</li>
+                                <li>在 X 平台使用 Grok 功能</li>
+                                <li>功能尚在試驗階段，請留意官方公告</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="steps" class="content-section">
+            <h2><i class="fas fa-footsteps mr-3"></i>生圖步驟</h2>
+            <p>AI 圖像生成主要分為「文生圖」和「圖生圖」兩種模式：</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div class="feature-card">
+                    <h3>文生圖 (Text-to-Image) 步驟</h3>
+                    <ol>
+                        <li><strong>輸入提示詞 (Prompt):</strong> 詳細描述圖像內容</li>
+                        <li><strong>選擇風格 (Style):</strong> 如動漫、寫實、油畫等</li>
+                        <li><strong>調整參數:</strong> 解析度、長寬比、生成數量</li>
+                        <li><strong>生成圖像:</strong> 點擊生成按鈕</li>
+                        <li><strong>優化與下載:</strong> 調整並下載最終圖像</li>
+                    </ol>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>圖生圖 (Image-to-Image) 步驟</h3>
+                    <ol>
+                        <li><strong>上傳參考圖:</strong> 作為生成基礎</li>
+                        <li><strong>輸入提示詞:</strong> 描述希望進行的修改</li>
+                        <li><strong>調整圖像強度:</strong> 控制新圖像對原始圖的保留程度</li>
+                        <li><strong>選擇風格:
+</strong> 指定生成圖像的風格</li>
+                        <li><strong>生成與優化:</strong> 生成新圖像並調整</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="feature-card mt-8">
+                <h3>參數調整技巧</h3>
+                <ul>
+                    <li><strong>解析度 (Resolution):</strong> 設置圖像尺寸（如 1024x1024）</li>
+                    <li><strong>長寬比 (Aspect Ratio):</strong> 橫向(16:9)、縱向(9:16)或方形(1:1)</li>
+                    <li><strong>生成數量 (Batch Size):</strong> 一次生成多張供選擇(建議4-8張)</li>
+                    <li><strong>種子碼 (Seed):</strong> 保持圖像相似性，用於微調</li>
+                    <li><strong>圖像強度:</strong> 值越高(0.7-0.9)越貼近原始圖，值越低(0.3-0.5)創意越多</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="prompts" class="content-section">
+            <h2><i class="fas fa-keyboard mr-3"></i>提示詞寫法與參考</h2>
+            <p>寫出好的提示詞是生成高品質AI圖像的關鍵：</p>
+            
+            <div class="feature-card">
+                <h3>提示詞結構要素</h3>
+                <ul>
+                    <li><strong>主體描述:</strong> 清晰描述圖像主體（人物、物體、場景）</li>
+                    <li><strong>場景環境:</strong> 設定場景背景（室內、室外、自然、城市）</li>
+                    <li><strong>藝術風格:</strong> 指定風格如寫實、動漫、油畫、賽博龐克</li>
+                    <li><strong>細節品質:</strong> 添加細節和品質要求（8k、超細節、電影級）</li>
+                    <li><strong>光線氛圍:</strong> 描述光照條件和感覺（夕陽、霓虹燈、陰暗）</li>
+                    <li><strong>負面提示詞:</strong> 排除不想要的元素（模糊、畸形、水印）</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3>高品質提示詞技巧</h3>
+                <ol>
+                    <li><strong>具體且詳細:</strong> 避免模糊詞彙，使用具體描述</li>
+                    <li><strong>使用強烈形容詞:</strong> 有效傳達意境和細節（威風凜凜的、色彩鮮豔的）</li>
+                    <li><strong>添加環境氛圍:</strong> 提升圖像感染力（清晨薄霧籠罩的森林）</li>
+                    <li><strong>疊加效果:</strong> 結合多種風格或元素（賽博龐克+傳統水墨）</li>
+                    <li><strong>使用權重控制:</strong> 強調重要元素（關鍵詞:1.5）</li>
+                </ol>
+            </div>
+            
+            <div class="feature-card">
+                <h3>常用風格提示詞</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <h4>寫實風格</h4>
+                        <p>photorealistic, ultra detailed, realistic lighting</p>
+                    </div>
+                    <div>
+                        <h4>動漫風格</h4>
+                        <p>anime style, Studio Ghibli, Makoto Shinkai</p>
+                    </div>
+                    <div>
+                        <h4>油畫風格</h4>
+                        <p>oil painting, Van Gogh style, impasto</p>
+                    </div>
+                    <div>
+                        <h4>像素藝術</h4>
+                        <p>pixel art, 16-bit, retro game style</p>
+                    </div>
+                    <div>
+                        <h4>賽博龐克</h4>
+                        <p>cyberpunk, neon lights, futuristic city</p>
+                    </div>
+                    <div>
+                        <h4>奇幻風格</h4>
+                        <p>fantasy art, magical, epic lighting</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 實際範例部分 - 使用您提供的代碼 -->
+        <div id="examples" class="content-section">
+            <h2>AI 生圖實際範例</h2>
+            <p>以下是一些使用不同提示詞生成的圖像範例，展示AI生圖的多樣性和可能性。</p>
+            
+            <div class="example-item">
+                <h3>科幻場景</h3>
+                <p><strong>提示詞</strong>: "a futuristic cityscape at night, neon lights, flying cars, cyberpunk style, by greg rutkowski, trending on artstation, 8k resolution"</p>
+                <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="科幻城市夜景" />
+            </div>
+            
+            <div class="example-item">
+                <h3>奇幻藝術</h3>
+                <p><strong>提示詞</strong>: "a magical forest with floating crystals, fairies, glowing mushrooms, digital painting, wlop style, detailed, high quality"</p>
+                <img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="奇幻森林" />
+            </div>
+            
+            <div class="example-item">
+                <h3>角色設計</h3>
+                <p><strong>提示詞</strong>: "a female warrior with a sword, armor, red cape, concept art, by alphonse mucha, sharp focus, 4k"</p>
+                <img src="https://images.unsplash.com/photo-1515405295579-ba7b45403062?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="女戰士" />
+            </div>
+            
+            <div class="example-item">
+                <h3>自然風景</h3>
+                <p><strong>提示詞</strong>: "a beautiful waterfall in a tropical jungle, sunlight filtering through the trees, realistic, photography, national geographic style"</p>
+                <img src="https://images.unsplash.com/photo-1511497584788-876760111969?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="熱帶叢林瀑布" />
+            </div>
+            
+            <div class="example-item">
+                <h3>抽象藝術</h3>
+                <p><strong>提示詞</strong>: "abstract painting of emotions, swirls of color, expressionism, vibrant colors, by jackson pollock, chaotic yet harmonious"</p>
+                <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="抽象藝術" />
+            </div>
+        </div>
+
+        <div id="videos" class="content-section">
+            <h2><i class="fas fa-video mr-3"></i>教學影片</h2>
+            <p>透過觀看教學影片，您可以更直觀地了解AI生圖工具的操作步驟和技巧：</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div class="feature-card">
+                    <h3>Bing Image Creator 使用教學</h3>
+                    <p>了解如何使用 Bing Image Creator 免費生成高品質圖像。</p>
+                    <a href="https://youtu.be/XNmhdZDAtqc?si=-6dKrhkH_uOHgPfF" target="_blank" class="block mt-4 rounded-xl overflow-hidden">
+                        <img src="https://img.youtube.com/vi/XNmhdZDAtqc/hqdefault.jpg" alt="Bing Image Creator 使用教學封面" class="video-thumbnail">
+                    </a>
+                    <a href="https://youtu.be/XNmhdZDAtqc?si=-6dKrhkH_uOHgPfF" target="_blank" class="inline-block mt-4 text-blue-400 hover:underline">
+                        <i class="fas fa-external-link-alt mr-2"></i>觀看完整教學
+                    </a>
+                    <p class="video-disclaimer">本影片來自公開之Youtube影片,純分享勿商用,其版權歸屬原作者.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>ChatGPT 生圖實戰</h3>
+                    <p>深入了解如何在 ChatGPT 中使用 DALL·E 3 進行創意圖像生成。</p>
+                    <a href="https://youtu.be/TQjZl3vsxSc?si=j9GyANBelntXrjFt" target="_blank" class="block mt-4 rounded-xl overflow-hidden">
+                        <img src="https://img.youtube.com/vi/TQjZl3vsxSc/hqdefault.jpg" alt="ChatGPT 生圖實戰封面" class="video-thumbnail">
+                    </a>
+                    <a href="https://youtu.be/TQjZl3vsxSc?si=j9GyANBelntXrjFt" target="_blank" class="inline-block mt-4 text-blue-400 hover:underline">
+                        <i class="fas fa-external-link-alt mr-2"></i>觀看完整教學
+                    </a>
+                    <p class="video-disclaimer">本影片來自公開之Youtube影片,純分享勿商用,其版權歸屬原作者.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>Dreamina 圖像生成教學</h3>
+                    <p>探索 Dreamina 如何幫助您快速生成圖像並轉換為短影片。</p>
+                    <a href="https://youtu.be/az3erp08BJc?si=krm1ifzQ57e2CJ8L" target="_blank" class="block mt-4 rounded-xl overflow-hidden">
+                        <img src="https://img.youtube.com/vi/az3erp08BJc/hqdefault.jpg" alt="Dreamina 圖像生成教學封面" class="video-thumbnail">
+                    </a>
+                    <a href="https://youtu.be/az3erp08BJc?si=krm1ifzQ57e2CJ8L" target="_blank" class="inline-block mt-4 text-blue-400 hover:underline">
+                        <i class="fas fa-external-link-alt mr-2"></i>觀看完整教學
+                    </a>
+                    <p class="video-disclaimer">本影片來自公開之Youtube影片,純分享勿商用,其版權歸屬原作者.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>ChatGPT4o生圖教學</h3>
+                    <p>學習如何撰寫更有效的提示詞來控制圖像生成效果。</p>
+                    <a href="https://youtu.be/M0JmfVpyX2o?si=XisFdQ_JOLwB4ldP" target="_blank" class="block mt-4 rounded-xl overflow-hidden">
+                        <img src="https://img.youtube.com/vi/M0JmfVpyX2o/hqdefault.jpg" alt="ChatGPT4o生圖教學封面" class="video-thumbnail">
+                    </a>
+                    <a href="https://youtu.be/M0JmfVpyX2o?si=XisFdQ_JOLwB4ldP" target="_blank" class="inline-block mt-4 text-blue-400 hover:underline">
+                        <i class="fas fa-external-link-alt mr-2"></i>觀看完整教學
+                    </a>
+                    <p class="video-disclaimer">本影片來自公開之Youtube影片,純分享勿商用,其版權歸屬原作者.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>AI 生圖學習指南 &copy; 2025 | 深度學習與人工智慧應用</p>
+        <p class="mt-2 text-sm">探索AI圖像生成的無限可能，釋放您的創造力</p>
+    </footer>
+
+    <script>
+        function showSection(sectionId, event) {
+            // 隱藏所有內容區塊
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // 移除所有導航按鈕的激活狀態
+            const buttons = document.querySelectorAll('.nav-button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // 顯示選定的區塊
+            const activeSection = document.getElementById(sectionId);
+            if (activeSection) {
+                activeSection.classList.add('active');
+            }
+
+            // 激活被點擊的按鈕
+            if (event && event.target && event.target.classList.contains('nav-button')) {
+                event.target.classList.add('active');
+            }
+            
+            // 滾動到內容區域
+            if (activeSection) {
+                activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 初始化：顯示第一個區塊並激活其按鈕
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstSection = document.getElementById('principles');
+            if (firstSection) {
+                firstSection.classList.add('active');
+            }
+            
+            const firstButton = document.querySelector('.nav-button');
+            if (firstButton) {
+                firstButton.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
